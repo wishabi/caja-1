@@ -143,6 +143,7 @@ function GuestManager(frameTamingSchema, frameTamingMembrane, divInfo,
     adviseFunctionAround: frameTamingSchema.published.adviseFunctionAround,
 
     USELESS: USELESS,
+    DESTROYED: false,
 
     api: function (imports) {
       args.moreImports = imports;
@@ -152,6 +153,16 @@ function GuestManager(frameTamingSchema, frameTamingMembrane, divInfo,
     flash: function(flag) {
       args.flash = !!flag;
       return self;
+    },
+
+    destroy: function() {
+      htmlEmitter.destroy();
+      domicile.destroy();
+      domicile = undefined;
+      htmlEmitter = undefined;
+      frameTamingMembrane.clear();
+
+      self.DESTROYED = true;
     },
 
     code: function (url, opt_mimeType, opt_content) {

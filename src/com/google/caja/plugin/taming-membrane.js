@@ -770,6 +770,16 @@ function TamingMembrane(helper, schema) {
     return feralByTame.has(t);
   }
 
+  function clearTamings() {
+    feralByTame = new WeakMap();
+    tameByFeral = new WeakMap();
+    helper.weakMapPermitHostObjects(tameByFeral);
+
+    // Useless value provided as a safe 'this' value to functions.
+    feralByTame.set(helper.USELESS, helper.USELESS);
+    tameByFeral.set(helper.USELESS, helper.USELESS);
+  }
+
   return Object.freeze({
     tame: tame,
     untame: untame,
@@ -777,6 +787,7 @@ function TamingMembrane(helper, schema) {
     reTamesTo: reTamesTo,
     hasTameTwin: hasTameTwin,
     hasFeralTwin: hasFeralTwin,
+    clear: clearTamings,
 
     // Any code which bypasses the membrane (e.g. in order to provide its own
     // tame twins, as Domado does) must also filter exceptions resulting from
