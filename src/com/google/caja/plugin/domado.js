@@ -1016,6 +1016,14 @@ var Domado = (function() {
         return (result === undefined || result === null) ?
           result : String(result);
       }),
+      withCredentials: Props.ampAccessor(
+        function(privates) {
+          return Boolean(privates.feral.withCredentials);
+        },
+        function(privates, withCredentials) {
+          privates.feral.withCredentials = Boolean(withCredentials);
+        }
+      ),
       open: Props.ampMethod(function(
           privates, method, URL, opt_async, opt_userName, opt_password) {
         method = String(method);
@@ -1036,7 +1044,7 @@ var Domado = (function() {
         if ('string' !== typeof safeUri) {
           throw 'URI violates security policy';
         }
-        switch (arguments.length) {
+        switch (arguments.length - 1) {
         case 2:
           privates.async = true;
           privates.feral.open(method, safeUri);
@@ -1057,7 +1065,7 @@ var Domado = (function() {
               String(opt_password));
           break;
         default:
-          throw 'XMLHttpRequest cannot accept ' + arguments.length +
+          throw 'XMLHttpRequest cannot accept ' + (arguments.length - 1) +
               ' arguments';
           break;
         }
