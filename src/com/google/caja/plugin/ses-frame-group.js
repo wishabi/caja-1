@@ -313,6 +313,7 @@ function SESFrameGroup(cajaInt, config, tamingWin, feralWin,
 
       var theContent = xhrRecord.responseText;
 
+      if (gman.DESTROYED) return;
       if (contentType === 'text/javascript'
           || contentType === 'application/javascript'
           || contentType === 'application/x-javascript'

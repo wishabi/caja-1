@@ -64,6 +64,9 @@ function HtmlEmitter(base, opt_mitigatingUrlRewriter, opt_domicile,
 
   // TODO: Take into account <base> elements.
 
+  // destroyed flag
+  var DESTROYED = false;
+
   /**
    * Contiguous pairs of ex-descendants of base, and their ex-parent.
    * The detached elements (even indices) are ordered depth-first.
@@ -542,6 +545,7 @@ function HtmlEmitter(base, opt_mitigatingUrlRewriter, opt_domicile,
       if (domicile && domicile.fetchUri) {
         domicile.fetchUri(url, mime,
           function (result) {
+            if (DESTROYED) return;
             if (result && result.html) {
               continuation(url, result.html);
             } else {
@@ -1378,6 +1382,12 @@ function HtmlEmitter(base, opt_mitigatingUrlRewriter, opt_domicile,
     domicile.evaluateUntrustedExternalScript =
       cajaVM.def(evaluateUntrustedExternalScript);
   })(opt_domicile);
+
+  this.destroy = function() {
+    DESTROYED = true;
+    opt_domicile.writeHook = null;
+    opt_domicile.evaluateUntrustedScript = null;
+  };
 }
 
 // Exports for closure compiler.
