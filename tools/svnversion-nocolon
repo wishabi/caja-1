@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
 # The output of this command must be valid as an App Engine version string.
-git describe --always | tr 'A-Z' 'a-z'
+git describe --tags --dirty=m --always
