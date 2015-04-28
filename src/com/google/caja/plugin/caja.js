@@ -338,6 +338,9 @@ var caja = (function () {
       partial['server'] || partial['cajaServer'] || defaultServer);
     full['resources'] = String(partial['resources'] || full['server']);
     full['debug'] = !!partial['debug'];
+    full['mitigateGotchas'] = 'mitigateGotchas' in partial ?
+        partial['mitigateGotchas'] : true;
+
     // es5Mode and forceES5Mode are legacy
     if ('forceES5Mode' in partial && partial['forceES5Mode'] !== true
         && partial['forceES5Mode'] !== undefined) {
@@ -454,24 +457,34 @@ var caja = (function () {
 
     var sesMaker = makeFrameMaker(config, 'ses-single-frame', frameInit);
 
-    loadCajaFrame(config, 'utility-frame', function (mitigateWin) {
-      var mitigateSrcGotchas = mitigateWin['ses']['mitigateSrcGotchas'];
-      sesMaker['make'](function (tamingWin) {
+    function initSes(opt_mitigateGotchas) {
+      var opts = typeof opt_mitigateGotchas === 'function' ?
+          {'mitigateSrcGotchas': opt_mitigateGotchas} : {};
+
+      sesMaker['make'](function(tamingWin) {
         if (tamingWin['ses']['ok']()) {
           var fg = tamingWin['SESFrameGroup'](
-              cajaInt, config, tamingWin, window,
-              { 'mitigateSrcGotchas': mitigateSrcGotchas });
+              cajaInt, config, tamingWin, window, opts);
           frameGroupReady(fg);
         } else {
           var err = new Error('Caja: Browser is unsupported');
-          if ("function" === typeof onFailure) {
+          if ('function' === typeof onFailure) {
             onFailure(err);
           } else {
             throw err;
           }
         }
       });
-    });
+    }
+
+    if (config['mitigateGotchas'] === true) {
+      loadCajaFrame(config, 'utility-frame', function (mitigateWin) {
+        var mitigateSrcGotchas = mitigateWin['ses']['mitigateSrcGotchas'];
+        initSes(mitigateSrcGotchas);
+      });
+    } else {
+      initSes();
+    }
   }
 
   //----------------
