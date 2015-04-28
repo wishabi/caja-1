@@ -154,6 +154,15 @@ function GuestManager(frameTamingSchema, frameTamingMembrane, divInfo,
       return self;
     },
 
+    destroy: function() {
+      domicile.destroy();
+      domicile = undefined;
+      frameTamingMembrane.clear();
+
+      // now delete the node
+
+    },
+
     code: function (url, opt_mimeType, opt_content) {
       args.url = url;
       args.mimeType = opt_mimeType;

@@ -1428,6 +1428,7 @@ var Domado = (function() {
     function tameSetAndClear(target, set, clear, setName, clearName, passArg,
         evalStrings, environment) {
       var ids = new WeakMap();
+      var feralIds = [];
       function tameSet(action, delayMillis) {
         // Existing browsers treat a timeout/interval of null or undefined as a
         // noop.
@@ -1472,6 +1473,7 @@ var Domado = (function() {
         var id = set(actionWrapper, delayMillis | 0);
         var tamed = {};
         ids.set(tamed, id);
+        feralIds.push(id);
         // Freezing is not *necessary*, but it makes testing/reasoning simpler
         // and removes a degree of freedom actual browsers don't provide (they
         // return numbers).
@@ -1491,7 +1493,19 @@ var Domado = (function() {
       }
       target[setName] = cajaVM.def(tameSet);
       target[clearName] = cajaVM.def(tameClear);
-      return target;
+
+      function feralClearAll() {
+        feralIds.forEach(function(id) {
+          clear(id);
+        });
+        feralIds = [];
+      }
+
+      return {
+        'set': tameSet,
+        'clear': tameClear,
+        'clearAll': feralClearAll
+      };
     }
 
     function makeScrollable(bridal, element) {
@@ -3643,6 +3657,9 @@ var Domado = (function() {
         return privates.feralEventTarget || privates.feral;
       }
 
+      var listenerRefs = {},
+          nextRef = 0;
+
       // Implementation of EventTarget::addEventListener
       var tameAddEventListenerProp =
           Props.ampMethod(function(privates, name, listener, useCapture) {
@@ -3658,12 +3675,16 @@ var Domado = (function() {
           var wrappedListener = makeEventHandlerWrapper(feral, listener);
           var remove = bridal.addEventListener(
               feral, name, wrappedListener, useCapture);
+
           list.push({
             n: name,
             l: listener,
             c: useCapture,
-            remove: remove
+            remove: remove,
+            ref: ++nextRef
           });
+
+          listenerRefs[nextRef] = [list, list[list.length-1]];
         }
       });
 
@@ -3677,6 +3698,11 @@ var Domado = (function() {
         if (!list) { return; }
         var match = searchForListener(list, name, listener, useCapture);
         if (match !== null) {
+          var ref = list[match].ref;
+          if (ref in listenerRefs) {
+            delete listenerRefs[ref];
+          }
+
           list[match].remove();
           arrayRemove(list, match, match);
         }
@@ -6964,8 +6990,6 @@ var Domado = (function() {
           // protocol for EventTarget operations
           privates.wrappedListeners = [];
           privates.feralEventTarget = feralWinNode;
-
-          Object.preventExtensions(privates);
         });
 
         // JS globals
@@ -7001,20 +7025,22 @@ var Domado = (function() {
         // a deviation from browser behavior (Chrome and Firefox have it on
         // prototype). requestAnimationFrame does not need the same treatment
         // but we might as well be regular.
-        tameSetAndClear(
+        var timeOutImpl = tameSetAndClear(
             this,
             window.setTimeout,
             window.clearTimeout,
             'setTimeout', 'clearTimeout',
             false, true, this);
-        tameSetAndClear(
+        var intervalImpl = tameSetAndClear(
             this,
             window.setInterval,
             window.clearInterval,
             'setInterval', 'clearInterval',
             false, true, this);
+
+        var animationImpl;
         if (window.requestAnimationFrame) {
-          tameSetAndClear(
+          animationImpl = tameSetAndClear(
               this,
               function(code, ignored) {  // no time arg like setTimeout has
                   return window.requestAnimationFrame(code); },
@@ -7022,6 +7048,16 @@ var Domado = (function() {
               'requestAnimationFrame', 'cancelAnimationFrame',
               true, false, undefined);
         }
+
+        TameWindowConf.amplify(this, function(privates) {
+          privates.clearAllTimeouts = function() {
+            timeOutImpl.clearAll();
+            intervalImpl.clearAll();
+            if (animationImpl) animationImpl.clearAll();
+          };
+
+          Object.preventExtensions(privates);
+        });
       }
       inertCtor(TameWindow, Object, 'Window');
       Props.define(TameWindow.prototype, TameWindowConf, {
@@ -7344,6 +7380,36 @@ var Domado = (function() {
         );
         domicile.getCssContainer().appendChild(element);
       })();
+
+      domicile.destroy = function() {
+        TameWindowConf.amplify(tameWindow, function(privates) {
+          privates.clearAllTimeouts();
+        });
+
+        for (var ref in listenerRefs) {
+          var list = listenerRefs[ref][0], listener = listenerRefs[ref][1];
+          var index = list.indexOf(listener);
+
+          listener.remove();
+          if (index >= 0)
+            arrayRemove(list, index, index);
+        }
+        listenerRefs = {};
+
+        // remove the nodes from the document
+        for (var i = 0, l = tameDocument.childNodes.length; i < l; i++) {
+          tameDocument.removeChild(tameDocument.childNodes[i]);
+        }
+
+        windowToDomicile['delete'](tameWindow);
+        importsToId['delete'](tameWindow);
+        delete idToImports[pluginId];
+
+        TameWindowConf = undefined;
+        TameHTMLDocumentConf = undefined;
+        tameWindow = undefined;
+        tameDocument = undefined;
+      };
 
       return domicile;
     }
