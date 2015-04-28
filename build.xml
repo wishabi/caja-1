@@ -1612,4 +1612,25 @@ For help on building and testing Caja, see:
     <echo>Created ${reports}/antdeps.png</echo>
   </target>
 
+  <target name="min-server" depends="CajolingServlet,pluginc,MinifiedJs">
+    <war destfile="caja.war" webxml="min-server.xml">
+      <zipfileset dir="${lib.caja}/plugin" prefix="${build.svnVersion}">
+        <include name="ses-single-frame.js"/>
+        <include name="ses-single-frame.opt.js"/>
+        <include name="utility-frame.js"/>
+        <include name="utility-frame.opt.js"/>
+      </zipfileset>
+      <fileset dir="${lib.caja}/plugin">
+        <include name="caja.js" />
+      </fileset>
+      <classes dir="${lib}">
+        <exclude name="**.js"/>
+        <exclude name="**.stamp"/>
+        <exclude name="js/"/>
+      </classes>
+      <lib file="${third_party}/java/javamail/mail.jar" />
+      <lib file="${third_party}/java/guava/guava-r09.jar" />
+      <lib file="${third_party}/java/json_simple/json_simple.jar" />
+    </war>
+  </target>
 </project>
