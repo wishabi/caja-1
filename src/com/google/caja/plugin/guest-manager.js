@@ -199,10 +199,10 @@ function GuestManager(frameTamingSchema, frameTamingMembrane, divInfo,
     if (domicile) {
       domicile.setBaseUri(URI.utils.resolve(hostBaseUrl, args.url));
     }
-    return runImpl(self, args, moreImports, function(result) {
+    return runImpl(self, args, moreImports, function(result, error) {
       setTimeout(function() { 
           if (opt_runDone) {
-            opt_runDone(result);
+            opt_runDone(result, error);
           }
       }, 0);
     });
