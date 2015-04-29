@@ -292,10 +292,14 @@ function SESFrameGroup(cajaInt, config, tamingWin, feralWin,
         Domado.handleUncaughtException(imports, e, gman.getUrl());
       }
       if (opt_runDone) {
-        opt_runDone(result);
+        opt_runDone(result, null);
       }
     }, function (failure) {
       config.console.log('Failed to load guest content: ' + failure);
+
+      if (opt_runDone) {
+        opt_runDone(null, failure);
+      }
     });
   }
 
