@@ -63,6 +63,7 @@
       "*::ONSELECT",
       "*::ONSUBMIT",
       "*::ONUNLOAD",
+      "VIDEO::ONABORT",
       "VIDEO::ONEMPTIED",
       "VIDEO::ONLOADEDMETADATA",
       "VIDEO::ONCANPLAY",

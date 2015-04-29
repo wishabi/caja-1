@@ -240,6 +240,7 @@
       { "key": "*::ONSELECT", "type": "SCRIPT", "optional": true },
       { "key": "*::ONSUBMIT", "type": "SCRIPT", "optional": true },
       { "key": "*::ONUNLOAD", "type": "SCRIPT", "optional": true },
+      { "key": "VIDEO::ONABORT", "type": "SCRIPT", "optional": true },
       { "key": "VIDEO::ONEMPTIED", "type": "SCRIPT", "optional": true },
       { "key": "VIDEO::ONLOADEDMETADATA", "type": "SCRIPT", "optional": true },
       { "key": "VIDEO::ONCANPLAY", "type": "SCRIPT", "optional": true },
