@@ -476,7 +476,7 @@ var Domado = (function() {
           }
         }
         amplifierMethod.toString = innocuous(function() {
-          return '[' + typename + ']' + method.toString();
+          return 'function () { [native code] }';
         });
         return cajaVM.constFunc(amplifierMethod);
       };
