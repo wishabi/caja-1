@@ -6800,6 +6800,15 @@ var Domado = (function() {
           var canonName = allCssProperties.cssToDom(cssPropertyName);
           return privates.readByCanonicalName(canonName);
         });
+        TameStyle.prototype.removeProperty =
+            TameStyleConf.amplifying(function(privates, cssPropertyName) {
+          cssPropertyName = String(cssPropertyName || '').toLowerCase();
+          if (!allowProperty(cssPropertyName)) { return ''; }
+          var canonName = allCssProperties.cssToDom(cssPropertyName);
+          var oldVal = privates.readByCanonicalName(canonName);
+          privates.feral.removeProperty(canonName);
+          return oldVal;
+        });
         Props.define(TameStyle.prototype, TameStyleConf, {
           toString: Props.overridable(false, innocuous(function() {
             return '[domado object Style]';
