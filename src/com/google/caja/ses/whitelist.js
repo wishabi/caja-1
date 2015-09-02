@@ -163,6 +163,8 @@ var ses;
           length: '*',  // does not inherit from Function.prototype on Chrome
           name: '*',  // ditto
           BYTES_PER_ELEMENT: '*',
+          from: t,
+          of: t,
           prototype: {
             buffer: 'maybeAccessor',
             byteOffset: 'maybeAccessor',
@@ -491,13 +493,15 @@ var ses;
       prototype: {
         exec: t,
         test: t,
-        source: '*',
-        global: '*',
-        ignoreCase: '*',
-        multiline: '*',
+        source: 'maybeAccessor',
+        global: 'maybeAccessor',
+        ignoreCase: 'maybeAccessor',
+        multiline: 'maybeAccessor',
+        flags: 'maybeAccessor',
+        unicode: 'maybeAccessor',
         lastIndex: '*',
         options: '*',                // non-std
-        sticky: '*'                  // non-std
+        sticky: 'maybeAccessor'      // non-std
       }
     },
     Error: {
